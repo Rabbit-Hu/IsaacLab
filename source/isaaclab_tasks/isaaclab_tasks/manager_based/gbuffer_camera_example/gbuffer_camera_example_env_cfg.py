@@ -6,8 +6,8 @@
 import math
 
 import isaaclab.sim as sim_utils
-from isaaclab.assets import ArticulationCfg, AssetBaseCfg
-from isaaclab.sensors import CameraCfg, TiledCameraCfg
+from isaaclab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
+from isaaclab.sensors import CameraCfg, TiledCameraCfg, GBufferCameraCfg
 from isaaclab.envs import ManagerBasedRLEnvCfg
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
@@ -17,8 +17,9 @@ from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.utils import configclass
+from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
-import isaaclab_tasks.manager_based.normal_camera_example.mdp as mdp
+import isaaclab_tasks.manager_based.gbuffer_camera_example.mdp as mdp
 
 ##
 # Pre-defined configs
@@ -33,7 +34,7 @@ from isaaclab_assets.robots.cartpole import CARTPOLE_CFG  # isort:skip
 
 
 @configclass
-class NormalCameraExampleSceneCfg(InteractiveSceneCfg):
+class GbufferCameraExampleSceneCfg(InteractiveSceneCfg):
     """Configuration for a cart-pole scene."""
 
     # ground plane
@@ -51,18 +52,58 @@ class NormalCameraExampleSceneCfg(InteractiveSceneCfg):
         spawn=sim_utils.DomeLightCfg(color=(0.9, 0.9, 0.9), intensity=500.0),
     )
     
-    # camera with normals
-    camera: TiledCameraCfg = TiledCameraCfg(
+    # gbuffer camera
+    # camera: TiledCameraCfg = TiledCameraCfg(
+    camera: GBufferCameraCfg = GBufferCameraCfg(
+        gbuffer_data_types=["albedo"],
         prim_path="{ENV_REGEX_NS}/Camera",
-        offset=TiledCameraCfg.OffsetCfg(pos=(-7.0, 0.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
-        data_types=["rgb", "normals"],
+        offset=GBufferCameraCfg.OffsetCfg(pos=(-7.0, 0.0, 3.0), rot=(0.9945, 0.0, 0.1045, 0.0), convention="world"),
+        data_types=["rgb", "normals", "instance_id_segmentation_fast"],
         spawn=sim_utils.PinholeCameraCfg(
             focal_length=24.0, focus_distance=400.0, horizontal_aperture=20.955, clipping_range=(0.1, 20.0)
         ),
-        width=100,
-        height=100,
+        width=400,
+        height=400,
+        colorize_instance_id_segmentation=False,
     )
     
+    # Complex geometric object: Textured crackerbox with rich visual details
+    decorative_crackerbox = RigidObjectCfg(
+        prim_path="{ENV_REGEX_NS}/DecorativeCrackerbox",
+        init_state=RigidObjectCfg.InitialStateCfg(
+            pos=[0.8, -0.15, 0.05],  # Position on the table surface, different location
+            rot=[1.0, 0.0, 0.0, 0.0],
+        ),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/003_cracker_box.usd",
+            scale=(4.0, 4.0, 4.0),  # Scale the crackerbox (x, y, z)
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                kinematic_enabled=True,  # Make it static (kinematic)
+            ),
+            mass_props=sim_utils.MassPropertiesCfg(mass=0.2),
+            collision_props=sim_utils.CollisionPropertiesCfg(),
+            # Note: YCB objects come with their own textures, so we don't override visual_material
+            # This preserves the original textured appearance with branding and details
+        ),
+    )
+    decorative_tomato_soup_can = RigidObjectCfg(
+        prim_path="{ENV_REGEX_NS}/DecorativeTomatoSoupCan",
+        init_state=RigidObjectCfg.InitialStateCfg(
+            pos=[0.6, 0.6, 0.15],  # Position on the table surface, different location
+            rot=[1.0, 0.0, 0.0, 0.0],
+        ),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"{ISAAC_NUCLEUS_DIR}/Props/YCB/Axis_Aligned_Physics/005_tomato_soup_can.usd",
+            scale=(4.0, 4.0, 4.0),  # Scale the soup can (x, y, z)
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                kinematic_enabled=True,  # Make it static (kinematic)
+            ),
+            mass_props=sim_utils.MassPropertiesCfg(mass=0.15),
+            collision_props=sim_utils.CollisionPropertiesCfg(),
+            # Note: YCB objects come with their own textures, so we don't override visual_material
+            # This preserves the original textured appearance with branding and details
+        ),
+    )
 
 
 ##
@@ -170,9 +211,9 @@ class TerminationsCfg:
 
 
 @configclass
-class NormalCameraExampleEnvCfg(ManagerBasedRLEnvCfg):
+class GbufferCameraExampleEnvCfg(ManagerBasedRLEnvCfg):
     # Scene settings
-    scene: NormalCameraExampleSceneCfg = NormalCameraExampleSceneCfg(num_envs=4096, env_spacing=4.0)
+    scene: GbufferCameraExampleSceneCfg = GbufferCameraExampleSceneCfg(num_envs=4096, env_spacing=4.0)
     # Basic settings
     observations: ObservationsCfg = ObservationsCfg()
     actions: ActionsCfg = ActionsCfg()
@@ -192,3 +233,7 @@ class NormalCameraExampleEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 1 / 120
         self.sim.render_interval = self.decimation
+        
+        # Necessary to get GBufferCamera working properly
+        self.sim.render.antialiasing_mode = "TAA"
+        self.sim.render.enable_dlssg = False
