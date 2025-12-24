@@ -235,5 +235,5 @@ class GbufferCameraExampleEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.render_interval = self.decimation
         
         # Necessary to get GBufferCamera working properly
-        self.sim.render.antialiasing_mode = "TAA"
-        self.sim.render.enable_dlssg = False
+        self.sim.render.antialiasing_mode = "DLAA"  # or "TAA"
+        # self.sim.render.enable_dlssg = False
