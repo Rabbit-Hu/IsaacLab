@@ -10,8 +10,8 @@ Script to visualize RGB and normals data from the camera in the normal_camera_ex
 """
 
 import argparse
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 
 from isaaclab.app import AppLauncher
@@ -30,11 +30,11 @@ simulation_app = app_launcher.app
 
 """Rest everything follows."""
 
+from gbuffer_camera_example_env_cfg import GbufferCameraExampleEnvCfg
+
 import isaaclab.sim as sim_utils
 from isaaclab.envs import ManagerBasedRLEnv
 from isaaclab.utils.dict import print_dict
-
-from gbuffer_camera_example_env_cfg import GbufferCameraExampleEnvCfg
 
 
 def main():
@@ -73,29 +73,32 @@ def main():
         normals_data = camera_data["normals"].cpu().numpy()  # Shape: (num_envs, H, W, 3)
         albedo_data = camera_data["gbuffer:albedo"].cpu().numpy()  # Shape: (num_envs, H, W, 3)
         instance_id_data = camera_data["instance_id_segmentation_fast"].cpu().numpy()  # Shape: (num_envs, H, W, 1)
-        
+
         print(f"RGB data: shape={rgb_data.shape}, dtype={rgb_data.dtype}, min={rgb_data.min()}, max={rgb_data.max()}")
         print(
-            f"Normals data: shape={normals_data.shape}, dtype={normals_data.dtype}, min={normals_data.min()}, max={normals_data.max()}"
+            f"Normals data: shape={normals_data.shape}, dtype={normals_data.dtype}, min={normals_data.min()},"
+            f" max={normals_data.max()}"
         )
         print(
-            f"Albedo data: shape={albedo_data.shape}, dtype={albedo_data.dtype}, min={albedo_data.min()}, max={albedo_data.max()}"
+            f"Albedo data: shape={albedo_data.shape}, dtype={albedo_data.dtype}, min={albedo_data.min()},"
+            f" max={albedo_data.max()}"
         )
         print(
-            f"Instance ID data: shape={instance_id_data.shape}, dtype={instance_id_data.dtype}, min={instance_id_data.min()}, max={instance_id_data.max()}"
+            f"Instance ID data: shape={instance_id_data.shape}, dtype={instance_id_data.dtype},"
+            f" min={instance_id_data.min()}, max={instance_id_data.max()}"
         )
-        
+
         print(f"idToLabels: {camera.data.info.get('instance_id_segmentation_fast', [{}]).get('idToLabels', {})}")
-        
+
         # Create visualization with grid layout: rows = num_envs, columns = 3 (RGB, Normals, Albedo)
         num_envs = rgb_data.shape[0]
         fig, axes = plt.subplots(num_envs, 4, figsize=(22, 5 * num_envs))
         fig.suptitle(f"Camera Data Visualization - {num_envs} Environments", fontsize=16)
-        
+
         # Handle single environment case (axes won't be 2D)
         if num_envs == 1:
             axes = axes.reshape(1, -1)
-        
+
         for env_idx in range(num_envs):
             # RGB image
             axes[env_idx, 0].imshow(rgb_data[env_idx])
@@ -112,9 +115,9 @@ def main():
             axes[env_idx, 2].imshow(albedo_data[env_idx])
             axes[env_idx, 2].set_title(f"Env {env_idx}: Albedo")
             axes[env_idx, 2].axis("off")
-            
+
             # Instance ID image
-            axes[env_idx, 3].imshow(instance_id_data[env_idx], cmap='jet')
+            axes[env_idx, 3].imshow(instance_id_data[env_idx], cmap="jet")
             axes[env_idx, 3].set_title(f"Env {env_idx}: Instance ID Segmentation")
             axes[env_idx, 3].axis("off")
 

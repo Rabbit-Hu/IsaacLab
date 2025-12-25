@@ -7,7 +7,6 @@ import math
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg, RigidObjectCfg
-from isaaclab.sensors import CameraCfg, TiledCameraCfg, GBufferCameraCfg
 from isaaclab.envs import ManagerBasedRLEnvCfg
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
@@ -16,6 +15,7 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
+from isaaclab.sensors import CameraCfg, GBufferCameraCfg, TiledCameraCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 
@@ -51,7 +51,7 @@ class GbufferCameraExampleSceneCfg(InteractiveSceneCfg):
         prim_path="/World/DomeLight",
         spawn=sim_utils.DomeLightCfg(color=(0.9, 0.9, 0.9), intensity=500.0),
     )
-    
+
     # gbuffer camera
     # camera: TiledCameraCfg = TiledCameraCfg(
     camera: GBufferCameraCfg = GBufferCameraCfg(
@@ -66,7 +66,7 @@ class GbufferCameraExampleSceneCfg(InteractiveSceneCfg):
         height=400,
         colorize_instance_id_segmentation=False,
     )
-    
+
     # Complex geometric object: Textured crackerbox with rich visual details
     decorative_crackerbox = RigidObjectCfg(
         prim_path="{ENV_REGEX_NS}/DecorativeCrackerbox",
@@ -233,7 +233,7 @@ class GbufferCameraExampleEnvCfg(ManagerBasedRLEnvCfg):
         # simulation settings
         self.sim.dt = 1 / 120
         self.sim.render_interval = self.decimation
-        
+
         # Necessary to get GBufferCamera working properly
         self.sim.render.antialiasing_mode = "DLAA"  # or "TAA"
         # self.sim.render.enable_dlssg = False

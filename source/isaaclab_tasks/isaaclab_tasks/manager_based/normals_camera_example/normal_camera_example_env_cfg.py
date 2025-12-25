@@ -7,7 +7,6 @@ import math
 
 import isaaclab.sim as sim_utils
 from isaaclab.assets import ArticulationCfg, AssetBaseCfg
-from isaaclab.sensors import CameraCfg, TiledCameraCfg
 from isaaclab.envs import ManagerBasedRLEnvCfg
 from isaaclab.managers import EventTermCfg as EventTerm
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
@@ -16,6 +15,7 @@ from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.scene import InteractiveSceneCfg
+from isaaclab.sensors import CameraCfg, TiledCameraCfg
 from isaaclab.utils import configclass
 
 import isaaclab_tasks.manager_based.normals_camera_example.mdp as mdp
@@ -50,7 +50,7 @@ class NormalCameraExampleSceneCfg(InteractiveSceneCfg):
         prim_path="/World/DomeLight",
         spawn=sim_utils.DomeLightCfg(color=(0.9, 0.9, 0.9), intensity=500.0),
     )
-    
+
     # camera with normals
     camera: TiledCameraCfg = TiledCameraCfg(
         prim_path="{ENV_REGEX_NS}/Camera",
@@ -62,7 +62,6 @@ class NormalCameraExampleSceneCfg(InteractiveSceneCfg):
         width=100,
         height=100,
     )
-    
 
 
 ##

@@ -1,12 +1,19 @@
-import torch
-import numpy as np
-import warp as wp
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence
-from collections.abc import Sequence as SequenceABC
+# Copyright (c) 2022-2025, The Isaac Lab Project Developers (https://github.com/isaac-sim/IsaacLab/blob/main/CONTRIBUTORS.md).
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
 
-from . import TiledCamera
+import numpy as np
+import torch
+from collections.abc import Sequence as SequenceABC
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from collections.abc import Sequence
+
+import warp as wp
 
 from isaaclab.utils.warp.kernels import reshape_tiled_image
+
+from . import TiledCamera
 
 if TYPE_CHECKING:
     from .gbuffer_camera_cfg import GBufferCameraCfg
@@ -37,8 +44,9 @@ class GBufferCamera(TiledCamera):
         """Initialize the camera with G-buffer support."""
         # Initialize parent class
         super()._initialize_impl()
-        
+
         import omni.replicator.core as rep
+
         print("Initializing GBufferCamera...")
 
         # Additional G-buffer annonators (in addition to tiled camera annotators)
@@ -56,7 +64,7 @@ class GBufferCamera(TiledCamera):
 
         for annotator in self._gbuffer_annotators.values():
             annotator.attach(self._render_product_paths)
-            
+
         print("G-buffer annotators attached.")
 
         # Add G-buffer data types to self.data.output
@@ -69,7 +77,7 @@ class GBufferCamera(TiledCamera):
                     dtype=torch.uint8,
                 )
         self._data.output = data_dict
-        
+
         print("GBufferCamera initialized successfully.")
 
     def _update_buffers_impl(self, env_ids: Sequence[int]):

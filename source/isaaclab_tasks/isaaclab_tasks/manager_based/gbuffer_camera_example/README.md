@@ -12,7 +12,7 @@ python visualize_camera.py --enable_cameras
 
 ## G-Buffer Camera Overview
 
-`GBufferCamera` (`source/isaaclab/isaaclab/sensors/camera/gbuffer_camera.py`) is derived from `TiledCamera` and extends its functionality by providing access to additional G-buffer data. 
+`GBufferCamera` (`source/isaaclab/isaaclab/sensors/camera/gbuffer_camera.py`) is derived from `TiledCamera` and extends its functionality by providing access to additional G-buffer data.
 
 Currently only albedo data is supported, which is implemented using the `DiffuseAlbedo` annotator in Omniverse Isaac Sim (see [docs](https://docs.omniverse.nvidia.com/py/replicator/latest/source/extensions/omni.replicator.core/docs/API.html#diffusealbedo)).
 
@@ -52,4 +52,3 @@ camera_data = camera.data.output
 # rgb_data = camera_data["rgb"].cpu().numpy()  # Shape: (num_envs, H, W, 3)
 albedo_data = camera_data["gbuffer:albedo"].cpu().numpy()  # Shape: (num_envs, H, W, 3)
 ```
-
